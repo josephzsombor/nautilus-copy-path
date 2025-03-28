@@ -6,7 +6,7 @@ from translation import Translation
 from gi import require_version
 import gi
 
-require_version('Gtk', '4.0')
+require_version('Gtk', '3.0') #Changed to 3.0 to align with requirements of nautilus version on my Ubuntu 22.04 system
 from gi.repository import Nautilus, GObject, Gtk, Gdk, GLib
 
 
@@ -28,8 +28,10 @@ class NautilusCopyPath(GObject.Object, Nautilus.MenuProvider):
     def __init__(self):
 
         self.display = Gdk.Display.get_default()
-        self.clipboard = self.display.get_clipboard()
-        self.primary_clipboard = self.display.get_primary_clipboard()
+#       self.clipboard = self.display.get_clipboard() #this wasn't working for me
+        self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD) #changed to GTK 3 pattern
+#       self.primary_clipboard = self.display.get_primary_clipboard() #this wasn't working for me
+        self.primary_clipboard = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
 
         self.selected_files = {}
 
@@ -190,7 +192,11 @@ class NautilusCopyPath(GObject.Object, Nautilus.MenuProvider):
                 new_value = shlex.quote(new_value)
 
             if self.config["selections"]["clipboard"]:
-                self.clipboard.set(new_value)
+#               self.clipboard.set(new_value) #wasn't working for me
+                self.clipboard.set_text(new_value, -1) #changed to GTK 3 pattern
+                self.clipboard.store()
 
             if self.config["selections"]["primary"]:
-                self.primary_clipboard.set(new_value)
+#               self.primary_clipboard.set(new_value) #wasn't working for me
+                self.primary_clipboard.set_text(new_value, -1) #changed to GTK 3 pattern
+                self.primary_clipboard.store()
